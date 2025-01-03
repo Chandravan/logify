@@ -1,0 +1,29 @@
+/* App.css */
+
+.container {
+    display: flex;
+    justify-content: space-between;
+    padding: 20px;
+    font-family: Arial, sans-serif;
+  }
+  
+  .scanner-container {
+    flex: 1;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+  
+  .student-details-container {
+    flex: 1;
+    margin-left: 20px;
+  }
+  
+  h1 {
+    font-size: 2em;
+  }
+  
+  button {
+    margin: 5px;
+  }
+  
