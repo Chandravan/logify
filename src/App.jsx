@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { db } from "./firebase";
 import {
   doc,
@@ -28,6 +28,9 @@ const ScannerPage = () => {
   const [isMobile, setIsMobile] = useState(false);
   const [scannerActive, setScannerActive] = useState(true);
 
+  const studentInfoRef = useRef(null);
+
+
   const regNo = manualRegNo || scanData;
 
   // Detect mobile device
@@ -48,6 +51,24 @@ const ScannerPage = () => {
       fetchStudent();
     }
   }, [regNo]);
+
+  useEffect(() => {
+  if (studentInfo && studentInfoRef.current) {
+    requestAnimationFrame(() => {
+      studentInfoRef.current.scrollIntoView({
+        behavior: "smooth",
+        block: "start",
+      });
+      // fallback
+      window.scrollTo({
+        top: studentInfoRef.current.offsetTop - 20,
+        behavior: "smooth",
+      });
+    });
+  }
+}, [studentInfo]);
+
+
 
   // QR Scanner
   const handleQRUpdate = (err, result) => {
@@ -112,6 +133,8 @@ const ScannerPage = () => {
         action: "Entry",
         time: currentTime,
         timestamp: new Date(),
+        exit: null,
+        exitTimestamp: null,
       });
 
       toast.success(`✅ Entry marked for ${studentInfo.name}`, {
@@ -147,7 +170,7 @@ const ScannerPage = () => {
       let lastEntryLog = null;
       logsSnap.forEach((doc) => {
         const log = doc.data();
-        if (log.registrationNo === regNo && log.action === "Entry" && !log.exit) {
+        if (log.registrationNo === regNo && log.action === "Entry" && log.exit === null) {
           lastEntryLog = { id: doc.id, ...log };
         }
       });
@@ -306,10 +329,12 @@ const ScannerPage = () => {
 
         {/* Student Info Card */}
         {studentInfo && (
+          
           <Card className="shadow-lg border-0 bg-white/90 backdrop-blur-sm animate-in slide-in-from-bottom duration-300">
+            <div ref={studentInfoRef}>
             <CardHeader className="pb-3">
               <CardTitle className="text-lg font-semibold text-center text-green-700">
-                ✅ Student Found
+                 Student Found
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
@@ -354,14 +379,14 @@ const ScannerPage = () => {
                       <span>Processing</span>
                     </div>
                   ) : (
-                    <>🏢 Mark Entry</>
+                    <> Mark Entry</>
                   )}
                 </Button>
                 <Button
                   onClick={handleExit}
                   disabled={loading}
                   variant="destructive"
-                  className="h-12 text-base font-semibold active:scale-95 transition-all duration-150"
+                  className="h-12 text-base font-semibold bg-red-600 hover:bg-red-700 active:scale-95 transition-all duration-150"
                 >
                   {loading ? (
                     <div className="flex items-center space-x-2">
@@ -369,7 +394,7 @@ const ScannerPage = () => {
                       <span>Processing</span>
                     </div>
                   ) : (
-                    <>🚪 Mark Exit</>
+                    <> Mark Exit</>
                   )}
                 </Button>
               </div>
@@ -383,6 +408,7 @@ const ScannerPage = () => {
                 🔄 Scan Another
               </Button>
             </CardContent>
+            </div>
           </Card>
         )}
 
